@@ -1,20 +1,23 @@
 import streamlit as st
 import pickle
 import re
+import os
 import nltk
 
 # Download NLTK data first
 nltk.download('stopwords')
 nltk.download('wordnet')
-nltk.download('omw-1.4')  # Add this too
+nltk.download('omw-1.4')
 
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 
 # Load model
-model = pickle.load(open("fake_news_model.pkl", "rb"))
-vectorizer = pickle.load(open("vectorizer.pkl", "rb"))
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+model = pickle.load(open(os.path.join(BASE_DIR, "fake_news_model.pkl"), "rb"))
+vectorizer = pickle.load(open(os.path.join(BASE_DIR, "vectorizer.pkl"), "rb"))
 
+# NLP setup
 stop_words = set(stopwords.words("english"))
 lemmatizer = WordNetLemmatizer()
 
@@ -39,12 +42,9 @@ with st.expander("About this model"):
 
 text = st.text_area("Enter News Article")
 
-
 if st.button("Predict"):
-    
     cleaned_text = clean_text(text)
     text_vector = vectorizer.transform([cleaned_text])
-    
     prediction = model.predict(text_vector)
 
     if prediction[0] == 1:
