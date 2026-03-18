@@ -2,16 +2,18 @@ import streamlit as st
 import pickle
 import re
 import nltk
+
+# Download NLTK data first
+nltk.download('stopwords')
+nltk.download('wordnet')
+nltk.download('omw-1.4')  # Add this too
+
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 
 # Load model
 model = pickle.load(open("fake_news_model.pkl", "rb"))
 vectorizer = pickle.load(open("vectorizer.pkl", "rb"))
-
-# NLP setup
-nltk.download("stopwords")
-nltk.download("wordnet")
 
 stop_words = set(stopwords.words("english"))
 lemmatizer = WordNetLemmatizer()
