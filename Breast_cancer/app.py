@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import joblib
 import plotly.graph_objects as go
+import os
 
 # ─── Page Config ──────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -238,13 +239,14 @@ st.markdown("""
 @st.cache_resource
 def load_model():
     try:
-        pipeline      = joblib.load("pipeline.pkl")
-        feature_names = joblib.load("feature_names.pkl")
+        base_dir      = os.path.dirname(os.path.abspath(__file__))
+        pipeline      = joblib.load(os.path.join(base_dir, "pipeline.pkl"))
+        feature_names = joblib.load(os.path.join(base_dir, "feature_names.pkl"))
         return pipeline, feature_names, None
     except FileNotFoundError as e:
         return None, None, str(e)
 
-
+# ✅ This line was missing — unpacking the return values
 pipeline, feature_names, load_error = load_model()
 
 
@@ -381,7 +383,6 @@ if page == "Single Prediction":
     run = st.button("ANALYSE SAMPLE →")
 
     if run:
-        # Build row in exact feature order saved in feature_names.pkl
         row = [input_values.get(f, FEATURE_META.get(f, (f, 0, 1, 0, 0.01))[2])
                for f in feature_names]
         input_df = pd.DataFrame([row], columns=feature_names)
@@ -391,7 +392,6 @@ if page == "Single Prediction":
         mal_prob  = proba[1]
         ben_prob  = proba[0]
 
-        # Result banner
         if pred == 1:
             st.markdown(f"""
             <div class="res-card malignant">
@@ -425,7 +425,6 @@ if page == "Single Prediction":
             </div>
             """, unsafe_allow_html=True)
 
-        # Charts
         col_g, col_b = st.columns(2)
 
         with col_g:
@@ -536,7 +535,6 @@ else:
                 true_labels = df_raw["diagnosis"].str.strip().map({"M": 1, "B": 0})
                 df_raw.drop(columns=["diagnosis"], inplace=True, errors="ignore")
 
-            # Validate columns
             missing = [f for f in feature_names if f not in df_raw.columns]
             if missing:
                 st.error(f"Missing columns: {', '.join(missing)}")
@@ -565,7 +563,6 @@ else:
             n_ben = (preds == 0).sum()
             total = len(preds)
 
-            # Tiles
             c1, c2, c3, c4 = st.columns(4)
             for col, (lbl, val, clr) in zip(
                 [c1, c2, c3, c4],
